@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rute Cooler City ke Momoyo - BFS</title>
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f4f1ec;
+      color: #2c2c2a;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    #topbar {
+      background: #fff;
+      border-bottom: 1px solid #ddd;
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      z-index: 999;
+    }
+
+    #topbar h1 {
+      font-size: 14px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .sep { color: #ddd; }
+
+    label {
+      font-size: 12px;
+      color: #888;
+      margin-right: 3px;
+    }
+
+    select {
+      font-size: 13px;
+      padding: 6px 10px;
+      border-radius: 8px;
+      border: 1px solid #d0cfc8;
+      background: #fff;
+      color: #2c2c2a;
+      cursor: pointer;
+      outline: none;
+    }
+
+    select:focus { border-color: #185FA5; }
+
+    .algo-badge {
+      font-size: 12px;
+      padding: 5px 14px;
+      border-radius: 20px;
+      background: #185FA5;
+      color: #fff;
+      font-weight: 600;
+    }
+
+    .speed-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .speed-group label { font-size: 12px; color: #888; }
+    .speed-group select { font-size: 12px; padding: 5px 8px; }
+
+    #btn-run {
+      background: #185FA5;
+      color: #fff;
+      border: none;
+      font-size: 13px;
+      font-weight: 500;
+      padding: 6px 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    #btn-run:hover { background: #0C447C; }
+
+    #btn-run:disabled {
+      background: #b4b2a9;
+      cursor: not-allowed;
+    }
+
+    #btn-stop {
+      font-size: 13px;
+      padding: 6px 14px;
+      border-radius: 8px;
+      border: 1px solid #F09595;
+      background: #fff;
+      color: #A32D2D;
+      cursor: pointer;
+      display: none;
+    }
+
+    #btn-stop.visible { display: inline-block; }
+
+    #btn-reset {
+      font-size: 13px;
+      padding: 6px 14px;
+      border-radius: 8px;
+      border: 1px solid #d0cfc8;
+      background: #fff;
+      color: #5f5e5a;
+      cursor: pointer;
+    }
+
+    #status-bar {
+      background: #1a1a1a;
+      color: #e0e0e0;
+      font-size: 11px;
+      padding: 5px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-height: 26px;
+      border-bottom: 1px solid #333;
+    }
+
+    #status-text { flex: 1; }
+
+    #step-counter {
+      color: #888;
+      font-size: 10px;
+    }
+
+    .pulse-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #4ade80;
+      display: inline-block;
+      margin-right: 4px;
+      animation: pulse 1s infinite;
+    }
+
+    .pulse-dot.idle {
+      background: #555;
+      animation: none;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.3; }
+    }
+
+    #main {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    #map {
+      flex: 1;
+      height: 100%;
+      z-index: 1;
+    }
+
+    #panel {
+      width: 315px;
+      min-width: 315px;
+      background: #fff;
+      border-left: 1px solid #ddd;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+
+    .panel-sec {
+      padding: 12px 14px;
+      border-bottom: 1px solid #eee;
+    }
+
+    #empty-state {
+      padding: 36px 18px;
+      text-align: center;
+      color: #777;
+      font-size: 13px;
+      line-height: 1.8;
+    }
+
+    #empty-state .ico {
+      font-size: 30px;
+      margin-bottom: 10px;
+    }
+
+    #live-panel {
+      padding: 10px 14px;
+      border-bottom: 1px solid #eee;
+      display: none;
+    }
+
+    #live-panel.active { display: block; }
+
+    .live-title {
+      font-size: 10px;
+      font-weight: 600;
+      color: #aaa;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 8px;
+    }
+
+    .progress-bar-wrap {
+      background: #f0ede8;
+      border-radius: 20px;
+      height: 6px;
+      overflow: hidden;
+      margin-top: 5px;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      border-radius: 20px;
+      transition: width 0.1s;
+    }
+
+    .algo-live-stats {
+      display: flex;
+      justify-content: space-between;
+      font-size: 10px;
+      color: #aaa;
+      margin-top: 4px;
+    }
+
+    .rcard {
+      background: #f7f5f1;
+      border-radius: 10px;
+      padding: 11px 13px;
+      margin-bottom: 8px;
+    }
+
+    .rcard .atag {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      font-weight: 700;
+      margin-bottom: 9px;
+      color: #185FA5;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+      background: #185FA5;
+    }
+
+    .rcard .val {
+      font-size: 20px;
+      font-weight: 700;
+      color: #2c2c2a;
+    }
+
+    .rcard .lbl {
+      font-size: 11px;
+      color: #aaa;
+      margin-bottom: 2px;
+    }
+
+    .route-list {
+      font-size: 12px;
+      line-height: 1.7;
+      color: #444;
+      padding-left: 18px;
+    }
+
+    .legend-box {
+      padding: 10px 14px 12px;
+      border-top: 1px solid #eee;
+      margin-top: auto;
+    }
+
+    .legend-title {
+      font-size: 10px;
+      font-weight: 600;
+      color: #aaa;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 8px;
+    }
+
+    .legend-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 6px;
+    }
+
+    .leg {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: #555;
+    }
+
+    .leg-line {
+      display: inline-block;
+      width: 26px;
+      height: 5px;
+      border-radius: 3px;
+      flex-shrink: 0;
+    }
+
+    .leg-dot {
+      display: inline-block;
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      border: 2px solid #fff;
+      box-shadow: 0 1px 3px rgba(0,0,0,.2);
+    }
+
+    .node-label {
+      background: #111;
+      color: #fff;
+      border: 3px solid #ffe600;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 15px;
+      box-shadow: 0 1px 5px rgba(0,0,0,.45);
+    }
+  </style>
+</head>
+
+<body>
+  <!-- ===== TOP BAR ===== -->
+  <div id="topbar">
+    <h1>🗺️ Rute Cooler City (A) ke Momoyo (H)</h1>
+    <span class="sep">|</span>
+
+    <div>
+      <label>Dari:</label>
+      <select id="sel-start" onchange="checkReady()">
+        <option value="">-- Pilih titik awal --</option>
+        <option value="A" selected>A - Cooler City Central Kencana</option>
+        <option value="B">B - Mr Blitz Batu 10</option>
+        <option value="C">C - Simpang Kedai Kopi</option>
+        <option value="D">D - Lorong Vicha</option>
+        <option value="E">E - Masjid Al-Uswah</option>
+        <option value="F">F - Pinang Lestari Swalayan</option>
+        <option value="G">G - Kimia Farma Bintan Center</option>
+        <option value="H">H - Momoyo Ice Cream</option>
+      </select>
+    </div>
+
+    <div>
+      <label>Ke:</label>
+      <select id="sel-end" onchange="checkReady()">
+        <option value="">-- Pilih tujuan --</option>
+        <option value="A">A - Cooler City Central Kencana</option>
+        <option value="B">B - Mr Blitz Batu 10</option>
+        <option value="C">C - Simpang Kedai Kopi</option>
+        <option value="D">D - Lorong Vicha</option>
+        <option value="E">E - Masjid Al-Uswah</option>
+        <option value="F">F - Pinang Lestari Swalayan</option>
+        <option value="G">G - Kimia Farma Bintan Center</option>
+        <option value="H" selected>H - Momoyo Ice Cream</option>
+      </select>
+    </div>
+
+    <div>
+      <span class="algo-badge">Breadth-First Search (BFS)</span>
+    </div>
+
+    <div class="speed-group">
+      <label>Kecepatan:</label>
+      <select id="sel-speed">
+        <option value="400">Lambat</option>
+        <option value="150" selected>Normal</option>
+        <option value="40">Cepat</option>
+        <option value="5">Sangat Cepat</option>
+      </select>
+    </div>
+
+    <button id="btn-run"   onclick="run()">▶ Cari Rute</button>
+    <button id="btn-stop"  onclick="stopAnimation()">■ Stop</button>
+    <button id="btn-reset" onclick="resetAll()">Reset</button>
+  </div>
+
+  <!-- ===== STATUS BAR ===== -->
+  <div id="status-bar">
+    <span class="pulse-dot idle" id="pulse"></span>
+    <span id="status-text">Pilih titik awal dan tujuan untuk memulai.</span>
+    <span id="step-counter"></span>
+  </div>
+
+  <!-- ===== MAIN CONTENT ===== -->
+  <div id="main">
+    <div id="map"></div>
+
+    <div id="panel">
+      <div id="empty-state">
+        <div class="ico">🧭</div>
+        Ini pakai <b>OpenStreetMap</b>, bukan tempelan gambar.<br>
+        Titik A diletakkan di area <b>Jl. Tanjung Uban Lama</b>
+        dan titik H di area <b>Jl. D.I. Panjaitan</b>.
+      </div>
+
+      <div id="live-panel">
+        <div class="live-title">🔴 Penyebaran BFS</div>
+        <div class="progress-bar-wrap">
+          <div class="progress-bar-fill" id="bfs-bar"
+               style="background:#185FA5;width:0%"></div>
+        </div>
+        <div class="algo-live-stats">
+          <span id="bfs-visited">0 titik diperiksa</span>
+          <span id="bfs-queue">antrian cabang: 0</span>
+        </div>
+      </div>
+
+      <div id="result" style="display:none; flex-direction:column; flex:1;"></div>
+
+      <div class="legend-box">
+        <div class="legend-title">Legenda</div>
+        <div class="legend-grid">
+          <div class="leg">
+            <span class="leg-line" style="background:#185FA5;"></span>
+            <span>Rute hasil BFS</span>
+          </div>
+          <div class="leg">
+            <span class="leg-dot" style="background:#60A5FA;"></span>
+            <span>Node yang diperiksa</span>
+          </div>
+          <div class="leg">
+            <span class="leg-dot" style="background:#16a34a;"></span>
+            <span>Titik awal</span>
+          </div>
+          <div class="leg">
+            <span class="leg-dot" style="background:#dc2626;"></span>
+            <span>Titik tujuan</span>
+          </div>
+          <div class="leg">
+            <span class="leg-line" style="background:#c8c3b8;height:2px;"></span>
+            <span>Jaringan jalan</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== LEAFLET ===== -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!--
+    ============================================================
+    URUTAN LOAD MODUL JS — JANGAN DIUBAH
+    (setiap file bergantung pada variabel dari file sebelumnya)
+
+    1. azalea  → mendefinisikan NODES, EDGES, adj, getNode, initGraph
+    2. rida    → mendefinisikan hitungJarakKm, hitungTotalJarak, formatJarak
+    3. ripa    → mendefinisikan bfs, highlightNode  (butuh adj, nodeMarkers)
+    4. sadil   → mendefinisikan map, nodeMarkers, initMap, drawBaseEdges, drawRoute
+    5. titin   → mendefinisikan run, stopAnimation, endAnimation,
+                 resetVisualization, resetAll, checkReady
+    ============================================================
+  -->
+  <script src="azalea-struktur-data.js"></script>
+  <script src="rida-perhitungan-jarak.js"></script>
+  <script src="ripa-algoritma-bfs.js"></script>
+  <script src="sadil-visualisasi-peta.js"></script>
+  <script src="titin-kontrol-animasi.js"></script>
+
+  <script>
+    // Entry point — dipanggil setelah semua modul siap
+    window.onload = () => {
+      if (typeof L === 'undefined') {
+        alert('Leaflet tidak terbaca. Pastikan internet aktif karena map memakai CDN Leaflet dan OpenStreetMap.');
+        return;
+      }
+
+      initGraph();   // Azalea
+      initMap();     // Sadil
+      checkReady();  // Titin
+    };
+  </script>
+</body>
+</html>
