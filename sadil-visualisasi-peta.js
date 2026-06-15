@@ -1,6 +1,7 @@
 /**
  * =====================================================
- *  ANGGOTA 4 — SADIL
+ *  ANGGOTA 4 — SAlSADILLA FRISCA ANJANI
+
  *  Modul: Visualisasi Peta
  *  Fungsi: makeNodeIcon(), initMap(), drawBaseEdges(), drawRoute()
  * =====================================================
