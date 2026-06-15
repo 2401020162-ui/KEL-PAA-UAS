@@ -1,6 +1,6 @@
 /**
  * =====================================================
- *  ANGGOTA 3 — RIPA
+ *  ANGGOTA 3 — NABIILAH RIFA MUSYIFA
  *  Modul: Algoritma BFS
  *  Fungsi: bfs(), highlightNode()
  * =====================================================
