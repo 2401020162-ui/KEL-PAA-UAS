@@ -1,6 +1,6 @@
 /**
  * =====================================================
- *  ANGGOTA 5 — TITIN
+ *  ANGGOTA 5 — Christine Simbolon
  *  Modul: Kontrol Sistem & Animasi
  *  Fungsi: run(), stopAnimation(), endAnimation(),
  *          resetVisualization(), resetAll(), checkReady()
