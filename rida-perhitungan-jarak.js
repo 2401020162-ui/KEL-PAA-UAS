@@ -1,6 +1,6 @@
 /**
  * =====================================================
- *  ANGGOTA 2 — RIDA
+ *  ANGGOTA 2 — MUNFARIDA
  *  Modul: Perhitungan Jarak
  *  Fungsi: hitungJarakKm(), hitungTotalJarak(), formatJarak()
  * =====================================================
